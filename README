@@ -1,0 +1,28 @@
+# Learning Vulkan w SDL3 
+repo to store files while learning vulkan w SDL3
+
+# Building
+
+need these packages, note this if for fedora, other distros may be named different
+
+```
+dnf install \
+    libX11-devel libXext-devel libXrandr-devel libXcursor-devel \
+    libXfixes-devel libXi-devel libXScrnSaver-devel libXtst-devel \
+    wayland-devel libdecor-devel mesa-libGL-devel mesa-libEGL-devel \
+    xorg-x11-server-devel
+```
+
+and these i guess idk
+
+```
+dnf install dbus-devel pipewire-devel pulseaudio-libs-devel libusb1-devel systemd-devel
+```
+
+1. Create and enter a build directory
+    - `cmake -B build -DCMAKE_BUILD_TYPE=Debug`
+2. Compile the project
+    - `cmake --build build`
+3. Run
+    - `./build/Debug/hello`
+
