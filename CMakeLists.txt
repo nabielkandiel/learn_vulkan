@@ -12,22 +12,13 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIGURATION>")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIGURATION>")
 
-# this will get generated into a .h and used in the code
-set(PROJECT_ASSET_PATH "${CMAKE_CURRENT_SOURCE_DIR}/assets/")
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/common/config.h.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/src/common/config.h")
-
 # This assumes the SDL source is available in vendored/SDL
 add_subdirectory(vendored/SDL EXCLUDE_FROM_ALL)
 
-# Create your game executable target as usual
-add_executable(nasty_tetris 
-    src/nasty_tetris/main.cpp
-    src/nasty_tetris/utility.cpp)
+add_subdirectory(src)
 
 # add includes
-target_include_directories(nasty_tetris PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/vendored/SDL/include)
-target_include_directories(nasty_tetris PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/src/common)
+target_include_directories(sdl_tetris PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/vendored/SDL/include)
 
 # Link to the actual SDL3 library.
-target_link_libraries(nasty_tetris PRIVATE SDL3::SDL3)
+target_link_libraries(sdl_tetris PRIVATE SDL3::SDL3)
