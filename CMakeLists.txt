@@ -14,11 +14,14 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIGURATION>")
 
 # This assumes the SDL source is available in vendored/SDL
 add_subdirectory(vendored/SDL EXCLUDE_FROM_ALL)
+add_subdirectory(vendored/SDL3_Image EXCLUDE_FROM_ALL)
 
 add_subdirectory(src)
 
 # add includes
-target_include_directories(sdl_tetris PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/vendored/SDL/include)
+target_include_directories(sdl_tetris PRIVATE 
+    ${CMAKE_CURRENT_SOURCE_DIR}/vendored/SDL/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/vendored/SDL3_Image/include)
 
 # Link to the actual SDL3 library.
-target_link_libraries(sdl_tetris PRIVATE SDL3::SDL3)
+target_link_libraries(sdl_tetris PRIVATE SDL3::SDL3 SDL3_image::SDL3_image)
