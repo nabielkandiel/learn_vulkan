@@ -7,7 +7,7 @@
 bool init(SDL_Window **window, SDL_Renderer **renderer, int width, int height);
 
 // loads media
-bool loadMedia(Texture &sdl_texture, SDL_Renderer *renderer);
+bool loadMedia(Texture &sdl_texture, SDL_Renderer *renderer, std::string_view fname);
 
 // frees media and shuts down SDL
 void close(SDL_Window **window_pp, Texture &sdl_texture, SDL_Renderer **renderer);

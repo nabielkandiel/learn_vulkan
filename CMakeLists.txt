@@ -18,6 +18,33 @@ add_subdirectory(vendored/SDL3_Image EXCLUDE_FROM_ALL)
 
 add_subdirectory(src)
 
+# add warnings for my binaries
+if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
+    target_compile_options(project_warnings INTERFACE
+        -Wall
+        -Wextra
+        -Wpedantic
+        -Wshadow
+        -Wconversion
+        -Wsign-conversion
+    )
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    target_compile_options(project_warnings INTERFACE
+        -Wall
+        -Wextra
+        -Wpedantic
+        -Wshadow
+        -Wconversion
+        -Wsign-conversion
+        -Wmisleading-indentation
+    )
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    target_compile_options(project_warnings INTERFACE
+        /W4 # Severe, specific, and informational warnings
+        /permissive- # Enforces standards conformance
+    )
+endif()
+
 # add includes
 target_include_directories(sdl_tetris PRIVATE 
     ${CMAKE_CURRENT_SOURCE_DIR}/vendored/SDL/include

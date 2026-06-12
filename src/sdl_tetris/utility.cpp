@@ -5,7 +5,6 @@
 #include "SDL3/SDL_init.h"
 #include "SDL3/SDL_log.h"
 #include "SDL3/SDL_render.h"
-#include "SDL3/SDL_surface.h"
 #include "SDL3/SDL_video.h"
 #include "config.h"
 
@@ -24,10 +23,10 @@ bool init(SDL_Window **window_pp, SDL_Renderer **renderer_pp, int width, int hei
 }
 
 // loads media
-bool loadMedia(Texture &sdl_texture, SDL_Renderer *sdl_renderer)
+bool loadMedia(Texture &sdl_texture, SDL_Renderer *sdl_renderer, std::string_view fname)
 {
     std::string image_path{ASSET_PATH};
-    image_path += "luxray.png";
+    image_path += fname;
     if (!sdl_texture.loadFromFile(image_path, sdl_renderer)) {
         SDL_Log("Unable to load image %s - SDL error: %s\n", image_path.c_str(), SDL_GetError());
         return false;
