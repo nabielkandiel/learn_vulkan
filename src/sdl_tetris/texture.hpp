@@ -1,11 +1,15 @@
 #pragma once
+#include <optional>
 #include <string>
+#include "SDL3/SDL_pixels.h"
 #include "SDL3/SDL_render.h"
 
 class Texture
 {
   public:
     Texture();
+    Texture(SDL_Color key);
+    Texture(std::optional<SDL_Color> key);
     ~Texture();
 
     // copy
@@ -37,6 +41,7 @@ class Texture
 
   private:
     SDL_Texture *sdl_texture;
+    std::optional<SDL_Color> color_key;
     int m_width;
     int m_height;
 };

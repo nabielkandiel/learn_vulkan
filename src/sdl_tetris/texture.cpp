@@ -1,9 +1,15 @@
 #include "texture.hpp"
+#include <optional>
+#include "SDL3/SDL_error.h"
 #include "SDL3/SDL_render.h"
 #include "SDL3/SDL_surface.h"
 #include "SDL3_image/SDL_image.h"
 
-Texture::Texture() : sdl_texture{nullptr}, m_width{0}, m_height{0} {}
+Texture::Texture() : Texture(std::nullopt) {}
+
+Texture::Texture(SDL_Color key) : Texture{std::optional<SDL_Color>{key}} {}
+
+Texture::Texture(std::optional<SDL_Color> key) : color_key{key}, sdl_texture{nullptr}, m_width{0}, m_height{0} {}
 
 Texture::~Texture()
 {
@@ -18,6 +24,14 @@ bool Texture::loadFromFile(const std::string &path, SDL_Renderer *sdl_renderer)
     if (loaded_surface == nullptr) {
         SDL_Log("Unable to load image %s - SDL image error%s\n", path.c_str(), SDL_GetError());
         return false;
+    }
+
+    if (color_key.has_value()) {
+        auto surface_rgb = SDL_MapSurfaceRGB(loaded_surface, color_key->r, color_key->g, color_key->b);
+        if (!SDL_SetSurfaceColorKey(loaded_surface, true, surface_rgb)) {
+            SDL_Log("Unable to color key - SDL error: %s\n", SDL_GetError());
+            return false;
+        }
     }
 
     sdl_texture = SDL_CreateTextureFromSurface(sdl_renderer, loaded_surface);
@@ -43,12 +57,12 @@ void Texture::destory()
 
 void Texture::render(float x_cord, float y_cord, SDL_Renderer *sdl_renderer, const SDL_FRect *src_rect)
 {
-    float w = static_cast<float>(m_width);
-    float h = static_cast<float>(m_height);
+    auto src_w = static_cast<float>(m_width);
+    auto src_h = static_cast<float>(m_height);
     if (src_rect != nullptr) {
-        w = src_rect->w;
-        h = src_rect->h;
+        src_w = src_rect->w;
+        src_h = src_rect->h;
     }
-    SDL_FRect dst_rect{.x = x_cord, .y = y_cord, .w = w, .h = h};
+    SDL_FRect dst_rect{.x = x_cord, .y = y_cord, .w = src_w, .h = src_h};
     SDL_RenderTexture(sdl_renderer, sdl_texture, src_rect, &dst_rect);
 }
