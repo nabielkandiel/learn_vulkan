@@ -4,10 +4,13 @@
 #include <concepts>
 #include <cstddef>
 #include <cstdint>
+#include <print>
 #include <span>
-#include <unordered_map>
 #include <utility>
 #include "SDL3/SDL_events.h"
+#include "SDL3/SDL_keyboard.h"
+#include "SDL3/SDL_keycode.h"
+#include "SDL3/SDL_rect.h"
 #include "SDL3/SDL_render.h"
 #include "SDL3/SDL_stdinc.h"
 #include "SDL3/SDL_video.h"
@@ -40,7 +43,7 @@ struct SpriteTexture
 
     template <typename T>
         requires std::same_as<T, float>
-    bool sliceTextureHorizontal(T spr_w, T spr_h)
+    void sliceTextureHorizontal(T spr_w, T spr_h)
     {
         std::span<SDL_FRect, 4> view{sprite_rects};
         size_t idx = 0;
@@ -48,6 +51,21 @@ struct SpriteTexture
             view[std::to_underlying(dir)] = {static_cast<float>(idx) * spr_w, 0.0F, spr_w, spr_h};
             idx++;
         }
+    }
+
+    [[nodiscard]] const SDL_FRect &getActiveRect() const
+    {
+        switch (active_dir) {
+        case Direction::UP:
+            return sprite_rects[std::to_underlying(Direction::UP)];
+        case Direction::DOWN:
+            return sprite_rects[std::to_underlying(Direction::DOWN)];
+        case Direction::LEFT:
+            return sprite_rects[std::to_underlying(Direction::LEFT)];
+        case Direction::RIGHT:
+            return sprite_rects[std::to_underlying(Direction::RIGHT)];
+        }
+        std::unreachable();
     }
 };
 
@@ -81,23 +99,74 @@ int main()
     SDL_Event event;
     SDL_zero(event);
 
+    character_texture.active_dir = SpriteTexture::Direction::UP;
+    // default background to white
+    SDL_Color bg_color{.r = 0xFF, .g = 0xFF, .b = 0xFF, .a = 0xFF};
+
     while (!quit) {
         // handle input
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_EVENT_QUIT) {
                 quit = true;
+            } else if (event.type == SDL_EVENT_KEY_DOWN) {
+                switch (event.key.key) {
+                case SDLK_UP:
+                    character_texture.active_dir = SpriteTexture::Direction::UP;
+                    break;
+                case SDLK_DOWN:
+                    character_texture.active_dir = SpriteTexture::Direction::DOWN;
+                    break;
+                case SDLK_LEFT:
+                    character_texture.active_dir = SpriteTexture::Direction::LEFT;
+                    break;
+                case SDLK_RIGHT:
+                    character_texture.active_dir = SpriteTexture::Direction::RIGHT;
+                    break;
+                default:
+                    break;
+                }
             }
         }
 
+        bg_color.r = 0xFF;
+        bg_color.g = 0xFF;
+        bg_color.b = 0xFF;
+
+        // set background color based on keys state
+        const bool *key_states = SDL_GetKeyboardState(nullptr);
+        if (key_states[SDL_SCANCODE_UP]) {
+            bg_color.r = 0xFF;
+            bg_color.g = 0x00;
+            bg_color.b = 0x00;
+        }
+        if (key_states[SDL_SCANCODE_DOWN]) {
+            bg_color.r = 0x00;
+            bg_color.g = 0xFF;
+            bg_color.b = 0x00;
+        }
+        if (key_states[SDL_SCANCODE_LEFT]) {
+            bg_color.r = 0xFF;
+            bg_color.g = 0xFF;
+            bg_color.b = 0x00;
+        }
+        if (key_states[SDL_SCANCODE_RIGHT]) {
+            bg_color.r = 0x00;
+            bg_color.g = 0x00;
+            bg_color.b = 0xFF;
+        }
         // set background to white
-        SDL_SetRenderDrawColor(sdl_renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+        SDL_SetRenderDrawColor(sdl_renderer, bg_color.r, bg_color.g, bg_color.b, 0xFF);
         SDL_RenderClear(sdl_renderer);
         // render image to screen
-        png_texture.render(0.F, 0.F, sdl_renderer);
+        const SDL_FRect src_rect = character_texture.getActiveRect();
+        float render_w = (k_screen_width - src_rect.w) / 2.F;
+        float render_h = (k_screen_height - src_rect.h) / 2.F;
+        character_texture.texture.render(render_w, render_h, sdl_renderer, &src_rect);
+
         // update screen
         SDL_RenderPresent(sdl_renderer);
     }
 
-    close(&sdl_window, png_texture, &sdl_renderer);
+    close(&sdl_window, character_texture.texture, &sdl_renderer);
     return 0;
 }

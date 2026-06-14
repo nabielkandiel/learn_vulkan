@@ -20,7 +20,7 @@ add_subdirectory(src)
 
 # add warnings for my binaries
 if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
-    target_compile_options(project_warnings INTERFACE
+    target_compile_options(sdl_tetris INTERFACE
         -Wall
         -Wextra
         -Wpedantic
@@ -29,7 +29,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "App
         -Wsign-conversion
     )
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    target_compile_options(project_warnings INTERFACE
+    target_compile_options(sdl_tetris INTERFACE
         -Wall
         -Wextra
         -Wpedantic
@@ -39,7 +39,7 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
         -Wmisleading-indentation
     )
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    target_compile_options(project_warnings INTERFACE
+    target_compile_options(sdl_tetris INTERFACE
         /W4 # Severe, specific, and informational warnings
         /permissive- # Enforces standards conformance
     )

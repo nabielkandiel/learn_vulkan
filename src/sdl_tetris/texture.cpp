@@ -41,8 +41,14 @@ void Texture::destory()
     m_width = 0;
 }
 
-void Texture::render(float x_cord, float y_cord, SDL_Renderer *sdl_renderer)
+void Texture::render(float x_cord, float y_cord, SDL_Renderer *sdl_renderer, const SDL_FRect *src_rect)
 {
-    SDL_FRect dst_rect{.x = x_cord, .y = y_cord, .w = static_cast<float>(m_width), .h = static_cast<float>(m_height)};
-    SDL_RenderTexture(sdl_renderer, sdl_texture, nullptr, &dst_rect);
+    float w = static_cast<float>(m_width);
+    float h = static_cast<float>(m_height);
+    if (src_rect != nullptr) {
+        w = src_rect->w;
+        h = src_rect->h;
+    }
+    SDL_FRect dst_rect{.x = x_cord, .y = y_cord, .w = w, .h = h};
+    SDL_RenderTexture(sdl_renderer, sdl_texture, src_rect, &dst_rect);
 }

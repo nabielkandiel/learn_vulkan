@@ -18,7 +18,7 @@ class Texture
 
     bool loadFromFile(const std::string &path, SDL_Renderer *sdl_renderer);
     void destory();
-    void render(float x_cord, float y_cord, SDL_Renderer *sdl_renderer);
+    void render(float x_cord, float y_cord, SDL_Renderer *sdl_renderer, const SDL_FRect *src_rect = nullptr);
 
     [[nodiscard]] int getWidth() const
     {
@@ -32,7 +32,7 @@ class Texture
 
     [[nodiscard]] bool isLoaded() const
     {
-        return sdl_texture == nullptr;
+        return sdl_texture != nullptr;
     }
 
   private:
