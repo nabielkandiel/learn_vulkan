@@ -2,4 +2,5 @@
 add_executable(sdl_tetris 
     main.cpp
     utility.cpp
-    texture.cpp)
+    texture.cpp
+    sprites.hpp)

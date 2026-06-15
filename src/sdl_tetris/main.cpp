@@ -15,16 +15,24 @@ int main()
     constexpr int k_screen_width{640};
     constexpr int k_screen_height{480};
 
+    enum class Direction : uint8_t
+    {
+        UP = 0,
+        DOWN = 1,
+        LEFT = 2,
+        RIGHT = 3,
+        COUNT = 4
+    };
+
     // window to be rendered to
     SDL_Window *sdl_window{nullptr};
     // surface in the window
     SDL_Renderer *sdl_renderer{nullptr};
     // character sprite
-    Sprites ball_sprite(
-        {Sprites::Direction::LEFT, Sprites::Direction::UP, Sprites::Direction::DOWN, Sprites::Direction::RIGHT},
-        SDL_Color{.r = 0, .g = 180, .b = 180, .a = 0});
+    Sprites<Direction> ball_sprite({Direction::LEFT, Direction::UP, Direction::DOWN, Direction::RIGHT},
+                                   SDL_Color{.r = 0, .g = 180, .b = 180, .a = 0});
 
-    ball_sprite.sliceTextureBox(32.0F, 32.0F);
+    ball_sprite.sliceTextureBox(32.0F, 32.0F, {.rows = 2, .cols = 2});
 
     SDL_Log("Starting with dimension %u x %u\n", k_screen_width, k_screen_height);
     if (!init(&sdl_window, &sdl_renderer, k_screen_width, k_screen_height)) {
@@ -32,7 +40,7 @@ int main()
         return 1;
     }
 
-    if (!loadMedia(ball_sprite.texture, sdl_renderer, "balls.png")) {
+    if (!loadMedia(ball_sprite.getTexture(), sdl_renderer, "balls.png")) {
         SDL_Log("failed to load media\n");
         return 2;
     }
@@ -41,7 +49,7 @@ int main()
     SDL_Event event;
     SDL_zero(event);
 
-    ball_sprite.active_dir = Sprites::Direction::UP;
+    ball_sprite.setActiveDir(Direction::UP);
     // default background to white
     SDL_Color bg_color{.r = 0xFF, .g = 0xFF, .b = 0xFF, .a = 0xFF};
 
@@ -53,16 +61,16 @@ int main()
             } else if (event.type == SDL_EVENT_KEY_DOWN) {
                 switch (event.key.key) {
                 case SDLK_UP:
-                    ball_sprite.active_dir = Sprites::Direction::UP;
+                    ball_sprite.setActiveDir(Direction::UP);
                     break;
                 case SDLK_DOWN:
-                    ball_sprite.active_dir = Sprites::Direction::DOWN;
+                    ball_sprite.setActiveDir(Direction::DOWN);
                     break;
                 case SDLK_LEFT:
-                    ball_sprite.active_dir = Sprites::Direction::LEFT;
+                    ball_sprite.setActiveDir(Direction::LEFT);
                     break;
                 case SDLK_RIGHT:
-                    ball_sprite.active_dir = Sprites::Direction::RIGHT;
+                    ball_sprite.setActiveDir(Direction::RIGHT);
                     break;
                 default:
                     break;
@@ -110,6 +118,6 @@ int main()
         SDL_RenderPresent(sdl_renderer);
     }
 
-    close(&sdl_window, ball_sprite.texture, &sdl_renderer);
+    close(&sdl_window, ball_sprite.getTexture(), &sdl_renderer);
     return 0;
 }

@@ -4,26 +4,22 @@
 #include <concepts>
 #include <span>
 #include <utility>
+#include "gridDimension.hpp"
 #include "texture.hpp"
 
-struct Sprites
+template <typename DirType> class Sprites
 {
-    enum class Direction : uint8_t
-    {
-        UP = 0,
-        DOWN = 1,
-        LEFT = 2,
-        RIGHT = 3,
-    };
-
+  private:
+    static constexpr size_t TOTAL_DIRS = static_cast<size_t>(DirType::COUNT);
     Texture texture;
-    std::array<SDL_FRect, 4> sprite_rects;
-    std::array<Direction, 4> dir_map;
-    Direction active_dir = Direction::UP;
+    std::array<SDL_FRect, TOTAL_DIRS> sprite_rects;
+    std::array<DirType, TOTAL_DIRS> dir_map;
+    DirType active_dir;
 
+  public:
     // passed is (index in png -> direction it represents)
-    Sprites(std::array<Direction, 4> dir_map, SDL_Color key) : dir_map(dir_map), texture(key) {}
-    Sprites(std::array<Direction, 4> dir_map) : dir_map(dir_map), texture(std::nullopt) {}
+    Sprites(std::array<DirType, TOTAL_DIRS> dir_map, SDL_Color key) : dir_map(dir_map), texture(key) {}
+    Sprites(std::array<DirType, TOTAL_DIRS> dir_map) : dir_map(dir_map), texture(std::nullopt) {}
     ~Sprites() = default;
     // dont allow this struct to be copied or moved
     Sprites(const Sprites &) = delete;            // Copy Constructor
@@ -31,9 +27,14 @@ struct Sprites
     Sprites(Sprites &&) = delete;                 // Move Constructor
     Sprites &operator=(Sprites &&) = delete;      // Move Assignment
 
+    Texture &getTexture()
+    {
+        return texture;
+    }
+
     void sliceTextureHorizontal(std::same_as<float> auto spr_w, std::same_as<float> auto spr_h)
     {
-        std::span<SDL_FRect, 4> view{sprite_rects};
+        std::span<SDL_FRect, TOTAL_DIRS> view{sprite_rects};
         size_t idx = 0;
         for (const auto &dir : dir_map) {
             view[std::to_underlying(dir)] = {static_cast<float>(idx) * spr_w, 0.0F, spr_w, spr_h};
@@ -41,19 +42,18 @@ struct Sprites
         }
     }
 
-    void sliceTextureBox(std::same_as<float> auto spr_w, std::same_as<float> auto spr_h)
+    void sliceTextureBox(std::same_as<float> auto spr_w, std::same_as<float> auto spr_h, GridDimensions dims)
     {
-        std::span<SDL_FRect, 4> view{sprite_rects};
+        std::span<SDL_FRect, TOTAL_DIRS> view{sprite_rects};
         size_t idx = 0;
         size_t idy = 0;
         for (const auto &dir : dir_map) {
             view[std::to_underlying(dir)] = {static_cast<float>(idx) * spr_w, static_cast<float>(idy) * spr_h, spr_w,
                                              spr_h};
-            if (idx == 1) {
+            idx++;
+            if (idx == dims.rows) {
                 idx = 0;
-                idy = 1;
-            } else {
-                idx++;
+                idy++;
             }
         }
     }
@@ -68,16 +68,11 @@ struct Sprites
 
     [[nodiscard]] const SDL_FRect &getActiveRect() const
     {
-        switch (active_dir) {
-        case Direction::UP:
-            return sprite_rects[std::to_underlying(Direction::UP)];
-        case Direction::DOWN:
-            return sprite_rects[std::to_underlying(Direction::DOWN)];
-        case Direction::LEFT:
-            return sprite_rects[std::to_underlying(Direction::LEFT)];
-        case Direction::RIGHT:
-            return sprite_rects[std::to_underlying(Direction::RIGHT)];
-        }
-        std::unreachable();
+        return sprite_rects[std::to_underlying(active_dir)];
+    }
+
+    void setActiveDir(const DirType dir)
+    {
+        active_dir = dir;
     }
 };
