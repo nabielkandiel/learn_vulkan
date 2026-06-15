@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <concepts>
 #include <span>
 #include <utility>
 #include "texture.hpp"
@@ -21,7 +22,8 @@ struct Sprites
     Direction active_dir = Direction::UP;
 
     // passed is (index in png -> direction it represents)
-    Sprites(std::array<Direction, 4> dir_map) : dir_map(dir_map) {}
+    Sprites(std::array<Direction, 4> dir_map, SDL_Color key) : dir_map(dir_map), texture(key) {}
+    Sprites(std::array<Direction, 4> dir_map) : dir_map(dir_map), texture(std::nullopt) {}
     ~Sprites() = default;
     // dont allow this struct to be copied or moved
     Sprites(const Sprites &) = delete;            // Copy Constructor
@@ -29,9 +31,7 @@ struct Sprites
     Sprites(Sprites &&) = delete;                 // Move Constructor
     Sprites &operator=(Sprites &&) = delete;      // Move Assignment
 
-    template <typename T>
-        requires std::same_as<T, float>
-    void sliceTextureHorizontal(T spr_w, T spr_h)
+    void sliceTextureHorizontal(std::same_as<float> auto spr_w, std::same_as<float> auto spr_h)
     {
         std::span<SDL_FRect, 4> view{sprite_rects};
         size_t idx = 0;
@@ -39,6 +39,31 @@ struct Sprites
             view[std::to_underlying(dir)] = {static_cast<float>(idx) * spr_w, 0.0F, spr_w, spr_h};
             idx++;
         }
+    }
+
+    void sliceTextureBox(std::same_as<float> auto spr_w, std::same_as<float> auto spr_h)
+    {
+        std::span<SDL_FRect, 4> view{sprite_rects};
+        size_t idx = 0;
+        size_t idy = 0;
+        for (const auto &dir : dir_map) {
+            view[std::to_underlying(dir)] = {static_cast<float>(idx) * spr_w, static_cast<float>(idy) * spr_h, spr_w,
+                                             spr_h};
+            if (idx == 1) {
+                idx = 0;
+                idy = 1;
+            } else {
+                idx++;
+            }
+        }
+    }
+
+    void renderActive(SDL_Renderer *sdl_renderer, std::same_as<float> auto center_x, std::same_as<float> auto center_y)
+    {
+        const auto src_rect = getActiveRect();
+        float render_x = center_x - (src_rect.w / 2.F);
+        float render_y = center_y - (src_rect.h / 2.F);
+        texture.render(render_x, render_y, sdl_renderer, &src_rect);
     }
 
     [[nodiscard]] const SDL_FRect &getActiveRect() const
