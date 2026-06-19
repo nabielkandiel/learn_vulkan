@@ -55,14 +55,33 @@ void Texture::destory()
     m_width = 0;
 }
 
-void Texture::render(float x_cord, float y_cord, SDL_Renderer *sdl_renderer, const SDL_FRect *src_rect)
+void Texture::render(SDL_FPoint dst_cords, SDL_Renderer *sdl_renderer, SDL_FPoint *dst_dims, SDL_FRect *src_rect)
 {
-    auto src_w = static_cast<float>(m_width);
-    auto src_h = static_cast<float>(m_height);
-    if (src_rect != nullptr) {
-        src_w = src_rect->w;
-        src_h = src_rect->h;
+    auto dst_w = static_cast<float>(m_width);
+    auto dst_h = static_cast<float>(m_height);
+    if (dst_dims != nullptr) {
+        dst_w = dst_dims->x;
+        dst_h = dst_dims->y;
+    } else if (src_rect != nullptr) {
+        dst_w = src_rect->w;
+        dst_h = src_rect->h;
     }
-    SDL_FRect dst_rect{.x = x_cord, .y = y_cord, .w = src_w, .h = src_h};
+    SDL_FRect dst_rect{.x = dst_cords.x, .y = dst_cords.y, .w = dst_w, .h = dst_h};
     SDL_RenderTexture(sdl_renderer, sdl_texture, src_rect, &dst_rect);
+}
+
+void Texture::renderWithTransform(SDL_FPoint dst_cords, SDL_Renderer *sdl_renderer, SDL_FPoint *dst_dims,
+                                  const SDL_FRect *src_rect, double degrees, SDL_FPoint *center, SDL_FlipMode flip_mode)
+{
+    auto dst_w = static_cast<float>(m_width);
+    auto dst_h = static_cast<float>(m_height);
+    if (dst_dims != nullptr) {
+        dst_w = dst_dims->x;
+        dst_h = dst_dims->y;
+    } else if (src_rect != nullptr) {
+        dst_w = src_rect->w;
+        dst_h = src_rect->h;
+    }
+    SDL_FRect dst_rect{.x = dst_cords.x, .y = dst_cords.y, .w = dst_w, .h = dst_h};
+    SDL_RenderTextureRotated(sdl_renderer, sdl_texture, src_rect, &dst_rect, degrees, center, flip_mode);
 }

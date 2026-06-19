@@ -66,6 +66,15 @@ template <typename DirType> class Sprites
         texture.render(render_x, render_y, sdl_renderer, &src_rect);
     }
 
+    void renderActiveWithTransform(SDL_FPoint dst_cords, SDL_Renderer *sdl_renderer, SDL_FPoint *dst_dims,
+                                   double degrees, SDL_FPoint *center, SDL_FlipMode flip_mode = SDL_FLIP_NONE)
+    {
+        const auto src_rect = getActiveRect();
+        float render_x = dst_cords.x - (src_rect.w / 2.F);
+        float render_y = dst_cords.y - (src_rect.h / 2.F);
+        texture.render(render_x, render_y, sdl_renderer, &src_rect);
+    }
+
     [[nodiscard]] const SDL_FRect &getActiveRect() const
     {
         return sprite_rects[std::to_underlying(active_dir)];

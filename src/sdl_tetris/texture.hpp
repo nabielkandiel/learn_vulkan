@@ -3,6 +3,7 @@
 #include <string>
 #include "SDL3/SDL_pixels.h"
 #include "SDL3/SDL_render.h"
+#include "SDL3/SDL_surface.h"
 
 class Texture
 {
@@ -22,7 +23,10 @@ class Texture
 
     bool loadFromFile(const std::string &path, SDL_Renderer *sdl_renderer);
     void destory();
-    void render(float x_cord, float y_cord, SDL_Renderer *sdl_renderer, const SDL_FRect *src_rect = nullptr);
+    void render(SDL_FPoint dst_cords, SDL_Renderer *sdl_renderer, SDL_FPoint *dst_dims, SDL_FRect *src_rect);
+    void renderWithTransform(SDL_FPoint dst_cords, SDL_Renderer *sdl_renderer, SDL_FPoint *dst_dims,
+                             const SDL_FRect *src_rect, double degrees, SDL_FPoint *center,
+                             SDL_FlipMode = SDL_FLIP_NONE);
 
     [[nodiscard]] int getWidth() const
     {
